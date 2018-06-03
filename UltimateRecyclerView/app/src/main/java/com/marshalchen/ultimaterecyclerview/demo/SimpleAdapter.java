@@ -1,6 +1,11 @@
 package com.marshalchen.ultimaterecyclerview.demo;
 
+/**
+ * Created by Marshal Chen on 3/8/2016.
+ */
+
 import android.graphics.Color;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -10,14 +15,17 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.marshalchen.ultimaterecyclerview.URLogs;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerviewViewHolder;
 import com.marshalchen.ultimaterecyclerview.UltimateViewAdapter;
+import com.marshalchen.ultimaterecyclerview.demo.rvComponents.itemCommonBinder;
+import com.marshalchen.ultimaterecyclerview.itemTouchHelper.ItemTouchHelperViewHolder;
 
 import java.security.SecureRandom;
 import java.util.List;
 
 
-public class SimpleAdapter extends UltimateViewAdapter<SimpleAdapter.SimpleAdapterViewHolder> {
+public class SimpleAdapter extends UltimateViewAdapter {
     private List<String> stringList;
 
     public SimpleAdapter(List<String> stringList) {
@@ -26,10 +34,10 @@ public class SimpleAdapter extends UltimateViewAdapter<SimpleAdapter.SimpleAdapt
 
 
     @Override
-    public void onBindViewHolder(final SimpleAdapterViewHolder holder, int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if (position < getItemCount() && (customHeaderView != null ? position <= stringList.size() : position < stringList.size()) && (customHeaderView != null ? position > 0 : true)) {
 
-            ((SimpleAdapterViewHolder) holder).textViewSample.setText(stringList.get(customHeaderView != null ? position - 1 : position));
+            ((ViewHolder) holder).textViewSample.setText(stringList.get(customHeaderView != null ? position - 1 : position));
             // ((ViewHolder) holder).itemView.setActivated(selectedItems.get(position, false));
             if (mDragStartListener != null) {
 //                ((ViewHolder) holder).imageViewSample.setOnTouchListener(new View.OnTouchListener() {
@@ -42,7 +50,7 @@ public class SimpleAdapter extends UltimateViewAdapter<SimpleAdapter.SimpleAdapt
 //                    }
 //                });
 
-                ((SimpleAdapterViewHolder) holder).item_view.setOnTouchListener(new View.OnTouchListener() {
+                ((ViewHolder) holder).item_view.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         return false;
@@ -59,44 +67,35 @@ public class SimpleAdapter extends UltimateViewAdapter<SimpleAdapter.SimpleAdapt
     }
 
     @Override
-    public SimpleAdapterViewHolder getViewHolder(View view) {
-        return new SimpleAdapterViewHolder(view, false);
+    public RecyclerView.ViewHolder newFooterHolder(View view) {
+        // return new itemCommonBinder(view, false);
+        return new UltimateRecyclerviewViewHolder<>(view);
     }
 
     @Override
-    public SimpleAdapterViewHolder onCreateViewHolder(ViewGroup parent) {
+    public RecyclerView.ViewHolder newHeaderHolder(View view) {
+        return new UltimateRecyclerviewViewHolder<>(view);
+    }
+
+    @Override
+    public UltimateRecyclerviewViewHolder onCreateViewHolder(ViewGroup parent) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.recycler_view_adapter, parent, false);
-        SimpleAdapterViewHolder vh = new SimpleAdapterViewHolder(v, true);
+        ViewHolder vh = new ViewHolder(v);
         return vh;
     }
 
 
     public void insert(String string, int position) {
-        insert(stringList, string, position);
+        insertInternal(stringList, string, position);
     }
 
     public void remove(int position) {
-        remove(stringList, position);
+        removeInternal(stringList, position);
     }
 
     public void clear() {
-        clear(stringList);
-    }
-
-    @Override
-    public void toggleSelection(int pos) {
-        super.toggleSelection(pos);
-    }
-
-    @Override
-    public void setSelected(int pos) {
-        super.setSelected(pos);
-    }
-
-    @Override
-    public void clearSelection(int pos) {
-        super.clearSelection(pos);
+        clearInternal(stringList);
     }
 
 
@@ -133,13 +132,13 @@ public class SimpleAdapter extends UltimateViewAdapter<SimpleAdapter.SimpleAdapt
         SecureRandom imgGen = new SecureRandom();
         switch (imgGen.nextInt(3)) {
             case 0:
-                imageView.setImageResource(R.drawable.test_back1);
+                imageView.setImageResource(R.drawable.jr1);
                 break;
             case 1:
-                imageView.setImageResource(R.drawable.test_back2);
+                imageView.setImageResource(R.drawable.jr2);
                 break;
             case 2:
-                imageView.setImageResource(R.drawable.test_back);
+                imageView.setImageResource(R.drawable.jr3);
                 break;
         }
 
@@ -147,17 +146,23 @@ public class SimpleAdapter extends UltimateViewAdapter<SimpleAdapter.SimpleAdapt
 
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
-        swapPositions(fromPosition, toPosition);
+        if (fromPosition > 0 && toPosition > 0) {
+            swapPositions(fromPosition, toPosition);
 //        notifyItemMoved(fromPosition, toPosition);
-        super.onItemMove(fromPosition, toPosition);
+            super.onItemMove(fromPosition, toPosition);
+        }
+
     }
 
     @Override
     public void onItemDismiss(int position) {
-        remove(position);
-        // notifyItemRemoved(position);
+        if (position > 0) {
+            remove(position);
+            // notifyItemRemoved(position);
 //        notifyDataSetChanged();
-        super.onItemDismiss(position);
+            super.onItemDismiss(position);
+        }
+
     }
 //
 //    private int getRandomColor() {
@@ -172,15 +177,14 @@ public class SimpleAdapter extends UltimateViewAdapter<SimpleAdapter.SimpleAdapt
 
     }
 
-
-    public class SimpleAdapterViewHolder extends UltimateRecyclerviewViewHolder {
+    class ViewHolder extends UltimateRecyclerviewViewHolder {
 
         TextView textViewSample;
         ImageView imageViewSample;
         ProgressBar progressBarSample;
         View item_view;
 
-        public  SimpleAdapterViewHolder(View itemView, boolean isItem) {
+        public ViewHolder(View itemView) {
             super(itemView);
 //            itemView.setOnTouchListener(new SwipeDismissTouchListener(itemView, null, new SwipeDismissTouchListener.DismissCallbacks() {
 //                @Override
@@ -196,15 +200,12 @@ public class SimpleAdapter extends UltimateViewAdapter<SimpleAdapter.SimpleAdapt
 //
 //                }
 //            }));
-            if (isItem) {
-                textViewSample = (TextView) itemView.findViewById(
-                        R.id.textview);
-                imageViewSample = (ImageView) itemView.findViewById(R.id.imageview);
-                progressBarSample = (ProgressBar) itemView.findViewById(R.id.progressbar);
-                progressBarSample.setVisibility(View.GONE);
-                item_view = itemView.findViewById(R.id.itemview);
-            }
-
+            textViewSample = (TextView) itemView.findViewById(
+                    R.id.textview);
+            imageViewSample = (ImageView) itemView.findViewById(R.id.imageview);
+            progressBarSample = (ProgressBar) itemView.findViewById(R.id.progressbar);
+            progressBarSample.setVisibility(View.GONE);
+            item_view = itemView.findViewById(R.id.itemview);
         }
 
         @Override
@@ -221,7 +222,8 @@ public class SimpleAdapter extends UltimateViewAdapter<SimpleAdapter.SimpleAdapt
     public String getItem(int position) {
         if (customHeaderView != null)
             position--;
-        if (position < stringList.size())
+        // URLogs.d("position----"+position);
+        if (position >= 0 && position < stringList.size())
             return stringList.get(position);
         else return "";
     }

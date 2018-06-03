@@ -21,17 +21,18 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.marshalchen.ultimaterecyclerview.quickAdapter.AdmobAdapter;
+
 /**
  * As RecyclerView does not have standard way to add click listeners to the items,
- * this RecyclerView.OnItemTouchListener intercepts touch events and translates them to simple onItemClick and onItemLongClick callbacks.
- * <p/>
+ * this RecyclerView.OnItemTouchListener intercepts touch events and translates them to simple
  * Simply add it as follows:
- * <pre>
+ *
  * {@code
  *     recyclerView.addOnItemTouchListener(new ItemTouchListenerAdapter(recyclerView, this));
  *
  * }
- * </pre>
+ *
  */
 public  class ItemTouchListenerAdapter extends GestureDetector.SimpleOnGestureListener implements RecyclerView.OnItemTouchListener {
 
@@ -46,7 +47,9 @@ public  class ItemTouchListenerAdapter extends GestureDetector.SimpleOnGestureLi
     private RecyclerView recyclerView;
     private GestureDetector gestureDetector;
 
-    public ItemTouchListenerAdapter(RecyclerView recyclerView, RecyclerViewOnItemClickListener listener) {
+    public ItemTouchListenerAdapter(
+            RecyclerView recyclerView,
+            RecyclerViewOnItemClickListener listener) {
         if (recyclerView == null || listener == null) {
             throw new IllegalArgumentException("RecyclerView and Listener arguments can not be null");
         }
@@ -63,6 +66,7 @@ public  class ItemTouchListenerAdapter extends GestureDetector.SimpleOnGestureLi
 
     @Override
     public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+
     }
 
     @Override
@@ -100,7 +104,8 @@ public  class ItemTouchListenerAdapter extends GestureDetector.SimpleOnGestureLi
         if (view == null) return false;
 
         view.setPressed(false);
-        int position = shiftAdjustInt(recyclerView.getChildPosition(view));
+        int position = shiftAdjustInt(recyclerView.getChildAdapterPosition(view));
+
         if (position != AdmobAdapter.POSITION_ON_AD) {
             listener.onItemClick(recyclerView, view, position);
         }
@@ -110,7 +115,7 @@ public  class ItemTouchListenerAdapter extends GestureDetector.SimpleOnGestureLi
     public void onLongPress(MotionEvent e) {
         View view = getChildViewUnder(e);
         if (view == null) return;
-        int position = shiftAdjustInt(recyclerView.getChildPosition(view));
+        int position = shiftAdjustInt(recyclerView.getChildAdapterPosition(view));
         if (position != AdmobAdapter.POSITION_ON_AD) {
             listener.onItemLongClick(recyclerView, view, position);
         }
