@@ -3,10 +3,13 @@
 buildscript {
     repositories {
         jcenter()
+        mavenCentral()
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.6.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.72"
+
     }
 }
 
@@ -26,11 +29,12 @@ ext {
     //Library configurations
     PUBLISH_GROUP_ID = 'com.marshalchen.ultimaterecyclerview'
     PUBLISH_ARTIFACT_ID = 'library'
-    PUBLISH_VERSION = '0.7.3'
-    VERSION_CODE = 26
+    PUBLISH_VERSION = '0.9.1'
+    VERSION_CODE = 31
+
     //Application
-    app_demo_versionCode = 26
-    app_demo_versionName = '1.7.3'
+    app_demo_versionCode = 31
+    app_demo_versionName = '1.7.6'
 
     IS_UPLOADING = project.getGradle().startParameter.taskNames.any { it.contains('bintrayUpload') }
 }
